@@ -7,10 +7,11 @@ import okhttp3.Request
 import ucb.softarch.currencyconverter.dtos.ExternalConvertDTO
 import ucb.softarch.currencyconverter.dtos.GetConversionRequestDTO
 import ucb.softarch.currencyconverter.dtos.GetConversionResponseDTO
+import ucb.softarch.currencyconverter.utils.HasLogging
 import java.io.IOException
 import java.math.BigDecimal
 
-class ConversionService constructor(dto: GetConversionRequestDTO)
+class ConversionService constructor(dto: GetConversionRequestDTO) : HasLogging()
 {
     private val currencyFrom = dto.from
     private val currencyTo = dto.to
@@ -22,14 +23,17 @@ class ConversionService constructor(dto: GetConversionRequestDTO)
     {
         if(cashAmount <= BigDecimal.ZERO)
         {
+            logger.error("Validation has failed")
             return false;
         }
 
+        logger.info("Successful validation")
         return true;
     }
 
     fun convert() : GetConversionResponseDTO
     {
+        logger.info("Attempt to connect to external service")
         val externalResponse = getExternalConversion()
 
         return GetConversionResponseDTO(externalResponse.response.to, externalResponse.response.value)
@@ -49,11 +53,12 @@ class ConversionService constructor(dto: GetConversionRequestDTO)
         client.newCall(request).execute().use { response ->
             if (!response.isSuccessful)
             {
+                logger.error("External request has failed")
                 throw IOException("Unexpected code $response")
             }
 
+            logger.info("External request has completed")
             return jacksonObjectMapper().readValue<ExternalConvertDTO>(response.body().string())
         }
-
     }
 }
