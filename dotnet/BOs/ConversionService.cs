@@ -1,6 +1,7 @@
 ﻿namespace currencyconverter.BOs
 {
     using currencyconverter.Dtos;
+    using RestSharp;
 
     public class ConversionService
     {
@@ -31,12 +32,23 @@
 
         public GetConversionResponseDTO Convert()
         {
-            return new GetConversionResponseDTO(BuildURL(), _cashAmount);
+            var externalResponse = GetExternalConversion();
+
+            return new GetConversionResponseDTO(externalResponse.Response.To, externalResponse.Response.Value);
         }
 
         private string BuildURL()
         {
             return $"{_externalServiceURL}?api_key={_apiKey}&to={_currencyTo}&from={_currencyFrom}&amount={_cashAmount}";
+        }
+
+        private ExternalConvertDTO GetExternalConversion()
+        {
+            var client = new RestClient(BuildURL());
+
+            var response = client.Get<ExternalConvertDTO>(new RestRequest());
+
+            return response;
         }
     }
 }
