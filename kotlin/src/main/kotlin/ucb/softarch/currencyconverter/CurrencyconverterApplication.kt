@@ -1,4 +1,4 @@
-package ucb.softarch.currencyconveter.currencyconverter
+package ucb.softarch.currencyconverter
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
