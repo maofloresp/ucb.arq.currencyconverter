@@ -2,7 +2,10 @@
 {
     using currencyconverter.BOs;
     using currencyconverter.Dtos;
+    using currencyconverter.Exceptions;
     using Microsoft.AspNetCore.Mvc;
+    using System;
+    using System.Net;
 
     [Route("/conversion")]
     [ApiController]
@@ -16,17 +19,26 @@
         }
 
         [HttpGet]
-        public GetConversionResponseDTO Get([FromQuery] GetConversionRequestDTO parameters)
+        public IActionResult Get([FromQuery] GetConversionRequestDTO parameters)
         {
             _logger.LogInformation("GET /conversion To={To}&from={From}&amount={Amount}", parameters.To, parameters.From, parameters.Amount);
-            var service = new ConversionService(parameters, _logger);
 
-            if (service.Validate())
+            try
             {
-                return service.Convert();
-            }
+                var service = new ConversionService(parameters, _logger);
 
-            throw new Exception();
+                if (service.Validate())
+                {
+                    return Ok(service.Convert());
+                }
+
+                throw new BadRequestException();
+                   
+            }
+            catch (HttpException ex)
+            {
+                return StatusCode((int)ex.StatusCode, ex.Message);
+            }
         }
     }
 }

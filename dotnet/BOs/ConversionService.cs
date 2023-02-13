@@ -1,7 +1,9 @@
 ﻿namespace currencyconverter.BOs
 {
     using currencyconverter.Dtos;
+    using currencyconverter.Exceptions;
     using RestSharp;
+    using System.Net;
 
     public class ConversionService
     {
@@ -52,8 +54,30 @@
         private ExternalConvertDTO GetExternalConversion()
         {
             var client = new RestClient(BuildURL());
-            var response = client.Get<ExternalConvertDTO>(new RestRequest());
 
+            ExternalConvertDTO? response;
+
+            try
+            {
+                response = client.Get<ExternalConvertDTO>(new RestRequest());
+            }
+            catch
+            {
+                _logger.LogError("External service is unavailable");
+                throw new ServiceUnavailableException("Service is temporarily unavailable, please try later");
+            }
+
+            if (response == null)
+            {
+                _logger.LogError("Can't process the external service response");
+                throw new InternalServerException("We can't process the request at this time");
+            }
+
+            if (response.Response.Value == 0)
+            {
+                _logger.LogWarning("Given currencies do not exist");
+                throw new NotFoundException("Target or source currency doesn't exist");
+            }
 
             _logger.LogInformation("External request has completed");
             return response;
