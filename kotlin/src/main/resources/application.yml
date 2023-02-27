@@ -8,6 +8,11 @@ server:
 spring:
   application:
     name: currency-converter
-  autoconfigure:
-    exclude:
-      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+  datasource:
+    type: org.postgresql.jdbc2.optional.SimpleDataSource
+    username: 
+    password:
+    url: jdbc:postgresql://localhost:5432/converter
+  jpa:
+    hibernate:
+      ddl-auto: update
