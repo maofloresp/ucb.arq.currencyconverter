@@ -32,6 +32,7 @@
                     return Ok(service.Convert());
                 }
 
+                _logger.LogError("Request failed due to malformation");
                 throw new BadRequestException();
                    
             }

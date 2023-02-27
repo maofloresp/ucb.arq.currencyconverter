@@ -8,6 +8,6 @@ abstract class HasLogging
     companion object {
         @JvmStatic
         protected val logger : Logger
-                = LoggerFactory.getLogger(javaClass)
+                = LoggerFactory.getLogger(this::class.java)
     }
 }

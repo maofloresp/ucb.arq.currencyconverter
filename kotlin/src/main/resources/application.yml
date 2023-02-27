@@ -1,0 +1,13 @@
+api:
+  key: ""
+  url: "https://api.currencybeacon.com/v1/convert"
+
+server:
+  port: 8080
+
+spring:
+  application:
+    name: currency-converter
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration

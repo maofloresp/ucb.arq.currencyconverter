@@ -8,7 +8,6 @@ import ucb.softarch.currencyconverter.dtos.ExternalConvertDTO
 import ucb.softarch.currencyconverter.dtos.GetConversionRequestDTO
 import ucb.softarch.currencyconverter.dtos.GetConversionResponseDTO
 import ucb.softarch.currencyconverter.utils.HasLogging
-import java.io.IOException
 import java.math.BigDecimal
 
 class ConversionService constructor(dto: GetConversionRequestDTO) : HasLogging()
@@ -54,11 +53,19 @@ class ConversionService constructor(dto: GetConversionRequestDTO) : HasLogging()
             if (!response.isSuccessful)
             {
                 logger.error("External request has failed")
-                throw IOException("Unexpected code $response")
+                throw Exception("Unexpected response $response")
+            }
+
+            val externalResponse = jacksonObjectMapper().readValue<ExternalConvertDTO>(response.body().string())
+
+            if (externalResponse.response.value == BigDecimal.ZERO)
+            {
+                logger.warn("Given currencies do not exist")
+                throw Exception("Target or source currency doesn't exist")
             }
 
             logger.info("External request has completed")
-            return jacksonObjectMapper().readValue<ExternalConvertDTO>(response.body().string())
+            return externalResponse
         }
     }
 }

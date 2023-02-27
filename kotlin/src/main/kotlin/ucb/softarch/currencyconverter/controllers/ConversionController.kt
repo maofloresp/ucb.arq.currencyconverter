@@ -23,6 +23,7 @@ class ConversionController : HasLogging()
             return service.convert()
         }
 
-        throw Exception()
+        logger.error("Request failed due to malformation")
+        throw Exception("Please review your request")
     }
 }
