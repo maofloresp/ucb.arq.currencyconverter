@@ -1,5 +1,5 @@
 api:
-  key: ""
+  key: ${API_KEY:""}
   url: "https://api.currencybeacon.com/v1/convert"
 
 server:
@@ -10,9 +10,9 @@ spring:
     name: currency-converter
   datasource:
     type: org.postgresql.jdbc2.optional.SimpleDataSource
-    username: 
-    password:
-    url: jdbc:postgresql://localhost:5432/converter
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:password}
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/converter}
   jpa:
     hibernate:
       ddl-auto: update
