@@ -4,17 +4,21 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
+import ucb.softarch.currencyconverter.daos.Currency
+import ucb.softarch.currencyconverter.daos.repository.CurrencyRepository
 import ucb.softarch.currencyconverter.dtos.ExternalConvertDTO
 import ucb.softarch.currencyconverter.dtos.GetConversionResponseDTO
 import ucb.softarch.currencyconverter.exceptions.ServiceException
 import ucb.softarch.currencyconverter.utils.HasLogging
 import java.lang.RuntimeException
 import java.math.BigDecimal
+import java.util.*
 
 @Service
-class ConversionService : HasLogging()
+class ConversionService @Autowired constructor(private val repository : CurrencyRepository) : HasLogging()
 {
     @Value("\${api.url}")
     lateinit var apiUrl: String
@@ -42,13 +46,12 @@ class ConversionService : HasLogging()
 
     private fun getExternalConversion(serviceURL : String) : ExternalConvertDTO
     {
-        logger.info("Attempt to connect to external service")
         val client = OkHttpClient()
-
         val request = Request.Builder().url(serviceURL).build()
 
         try
         {
+            logger.info("Attempt to connect to external service")
             client.newCall(request).execute().use { response ->
                 if (!response.isSuccessful)
                 {
@@ -56,12 +59,11 @@ class ConversionService : HasLogging()
                     throw ServiceException("Error in third party services")
                 }
 
-                logger.info("Attempt to parse the response")
-
                 val externalResponse : ExternalConvertDTO
 
                 try
                 {
+                    logger.info("Attempt to parse the response")
                     externalResponse = jacksonObjectMapper().readValue<ExternalConvertDTO>(response.body().string())
                 }
                 catch (ex : Exception)
@@ -70,12 +72,22 @@ class ConversionService : HasLogging()
                     throw ServiceException("Did not processed the response correctly")
                 }
 
-
                 if (externalResponse.response.value == BigDecimal.ZERO)
                 {
                     logger.warn("Given currencies do not exist")
                     throw ServiceException("Target or source currency doesn't exist")
                 }
+
+                val record = Currency(
+                        externalResponse.response.from,
+                        externalResponse.response.to,
+                        externalResponse.response.amount,
+                        externalResponse.response.value
+                        , Date()
+                )
+
+                logger.info("Storing in the database")
+                repository.save(record)
 
                 logger.info("External request has completed")
                 return externalResponse
