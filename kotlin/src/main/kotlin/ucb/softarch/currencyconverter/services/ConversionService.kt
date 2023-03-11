@@ -6,20 +6,25 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
-import ucb.softarch.currencyconverter.daos.Currency
-import ucb.softarch.currencyconverter.daos.repository.CurrencyRepository
+import ucb.softarch.currencyconverter.daos.Conversion
+import ucb.softarch.currencyconverter.daos.repository.ConversionsRepository
 import ucb.softarch.currencyconverter.dtos.ExternalConvertDTO
 import ucb.softarch.currencyconverter.dtos.GetConversionResponseDTO
 import ucb.softarch.currencyconverter.exceptions.ServiceException
 import ucb.softarch.currencyconverter.utils.HasLogging
-import java.lang.RuntimeException
 import java.math.BigDecimal
 import java.util.*
 
+
 @Service
-class ConversionService @Autowired constructor(private val repository : CurrencyRepository) : HasLogging()
+class ConversionService @Autowired constructor(private val repository : ConversionsRepository) : HasLogging()
 {
+    private val pagingSize = 10
+
     @Value("\${api.url}")
     lateinit var apiUrl: String
 
@@ -37,6 +42,14 @@ class ConversionService @Autowired constructor(private val repository : Currency
         val externalResponse = getExternalConversion(buildURL(from, to, amount))
 
         return GetConversionResponseDTO(externalResponse.response.to, externalResponse.response.value)
+    }
+
+    fun getConversions(pageNumber: Int) : List<Conversion>
+    {
+        val pageable: Pageable = PageRequest.of(pageNumber - 1, pagingSize, Sort.by(
+                Sort.Order.desc("date")))
+
+        return repository.findAll(pageable).toList()
     }
 
     private fun buildURL(from : String, to : String, amount : BigDecimal): String
@@ -78,13 +91,16 @@ class ConversionService @Autowired constructor(private val repository : Currency
                     throw ServiceException("Target or source currency doesn't exist")
                 }
 
-                val record = Currency(
+                val record = Conversion(
                         externalResponse.response.from,
                         externalResponse.response.to,
                         externalResponse.response.amount,
                         externalResponse.response.value
                         , Date()
                 )
+//
+                //
+
 
                 logger.info("Storing in the database")
                 repository.save(record)

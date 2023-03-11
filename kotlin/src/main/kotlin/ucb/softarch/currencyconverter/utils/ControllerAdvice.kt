@@ -20,7 +20,7 @@ class ControllerAdvice : ResponseEntityExceptionHandler()
     }
 
     @ExceptionHandler(SocketTimeoutException::class)
-    fun handleSocketTimeoutException(ex: SocketTimeoutException): ResponseEntity<Any?>? {
+    fun handleSocketTimeoutException(): ResponseEntity<Any?>? {
         val body: MutableMap<String, Any?> = LinkedHashMap()
         body["timestamp"] = LocalDateTime.now()
         body["message"] = "Service is not available at the moment"
