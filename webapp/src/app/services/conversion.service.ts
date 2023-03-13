@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Conversion } from '../models/conversion';
 import { Observable, throwError } from 'rxjs';
-//import { catchError, retry } from 'rxjs/operators';
+import { environment } from 'src/environments/environment.development';
 
 @Injectable({
   providedIn: 'root'
@@ -17,7 +17,7 @@ export class ConversionService {
   {
     const params = new HttpParams();
 
-    return this.httpClient.post<any>(`http://localhost:8080/conversions?to=${to}&from=${from}&amount=${amount}`, params)
+    return this.httpClient.post<any>(`${environment.BACKEND}/conversions?to=${to}&from=${from}&amount=${amount}`, params)
 
   }
 
@@ -26,6 +26,6 @@ export class ConversionService {
     const params = new HttpParams()
     .set('page', page);
 
-    return this.httpClient.get<any>('http://localhost:8080/conversions', { params });
+    return this.httpClient.get<any>(`${environment.BACKEND}/conversions`, { params });
   }
 }
