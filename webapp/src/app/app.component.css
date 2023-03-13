@@ -21,3 +21,10 @@ table {
     width: 80%;
     min-width: 80%;
   }
+
+p {
+    color: #fff;
+text-align: center;
+margin: 2rem auto;
+font-size: xx-large;
+}

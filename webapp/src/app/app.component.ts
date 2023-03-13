@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Conversion } from './models/conversion'
 import { ConversionService } from './services/conversion.service';
+import { PageEvent } from '@angular/material/paginator';
 
 @Component({
   selector: 'app-root',
@@ -14,6 +15,14 @@ export class AppComponent {
   author = 'Mauricio Flores';
   currencyForm : FormGroup;
   result = 0;
+
+  length = 50;
+  pageSize = 5;
+  pageIndex = 0;
+  hidePageSize = false;
+  showPageSizeOptions = false;
+  showFirstLastButtons = false;
+  disabled = false;
 
   displayedColumns: string[] = ['date', 'from', 'amount', 'to', 'value'];
   dataSource: Conversion[] =  [];
@@ -39,7 +48,11 @@ export class AppComponent {
   private readConversions(page : number = 1)
   {
     this.conversionService.getConversions(page).subscribe({
-      next: (data) => this.dataSource = data,
+      next: (data) => 
+      {
+        this.dataSource = data,
+        this.pageIndex = page - 1;
+      },
       error: () => this.dataSource = []
     });
   }
@@ -54,6 +67,10 @@ export class AppComponent {
       },
       error: () => this.result = -1
     });
+  }
+
+  handlePageEvent(e: PageEvent) {
+    this.readConversions(e.pageIndex + 1);
   }
 
   submit()
