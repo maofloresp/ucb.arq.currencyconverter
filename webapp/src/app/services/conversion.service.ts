@@ -1,15 +1,14 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Conversion } from '../models/conversion';
-import { Observable, throwError } from 'rxjs';
+import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment.development';
+import { ConversionList } from '../models/conversionList';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ConversionService {
-
-  conversions: Conversion[] = [];
 
   constructor(private httpClient: HttpClient) { }
 
@@ -21,7 +20,7 @@ export class ConversionService {
 
   }
 
-  getConversions(page: number): Observable<Conversion[]>
+  getConversions(page: number): Observable<ConversionList>
   {
     const params = new HttpParams()
     .set('page', page);

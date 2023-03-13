@@ -50,7 +50,8 @@ export class AppComponent {
     this.conversionService.getConversions(page).subscribe({
       next: (data) => 
       {
-        this.dataSource = data,
+        this.dataSource = data.list;
+        this.length = data.length;
         this.pageIndex = page - 1;
       },
       error: () => this.dataSource = []

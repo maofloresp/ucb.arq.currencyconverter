@@ -1,5 +1,5 @@
 package ucb.softarch.currencyconverter.dtos
 
-import java.math.BigDecimal
+import ucb.softarch.currencyconverter.daos.Conversion
 
-data class GetConversionResponseDTO(val currency: String, val amount: BigDecimal)
+data class GetConversionResponseDTO(val length: Long, val list: List<Conversion>)

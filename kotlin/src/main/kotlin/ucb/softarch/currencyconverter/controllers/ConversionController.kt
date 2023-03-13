@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 import ucb.softarch.currencyconverter.daos.Conversion
 import ucb.softarch.currencyconverter.dtos.GetConversionRequestDTO
+import ucb.softarch.currencyconverter.dtos.GetConversionResponseDTO
 import ucb.softarch.currencyconverter.services.ConversionService
 import ucb.softarch.currencyconverter.utils.HasLogging
 import java.util.*
@@ -20,7 +21,7 @@ class ConversionController @Autowired constructor(private val service: Conversio
     }
 
     @GetMapping("/conversions")
-    fun get(@RequestParam(defaultValue = "1") page: Int) : List<Conversion>
+    fun get(@RequestParam(defaultValue = "1") page: Int) : GetConversionResponseDTO
     {
         logger.info("GET /conversion page=${page}")
         return service.getConversions(page)

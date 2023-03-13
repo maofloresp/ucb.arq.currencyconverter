@@ -42,12 +42,12 @@ class ConversionService @Autowired constructor(private val repository : Conversi
         return getExternalConversion(buildURL(from, to, amount))
     }
 
-    fun getConversions(pageNumber: Int) : List<Conversion>
+    fun getConversions(pageNumber: Int) : GetConversionResponseDTO
     {
         val pageable: Pageable = PageRequest.of(pageNumber - 1, pagingSize, Sort.by(
                 Sort.Order.desc("date")))
 
-        return repository.findAll(pageable).toList()
+        return GetConversionResponseDTO(repository.count(), repository.findAll(pageable).toList())
     }
 
     private fun buildURL(from : String, to : String, amount : BigDecimal): String
