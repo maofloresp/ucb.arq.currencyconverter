@@ -23,7 +23,7 @@ import java.util.*
 @Service
 class ConversionService @Autowired constructor(private val repository : ConversionsRepository) : HasLogging()
 {
-    private val pagingSize = 10
+    private val pagingSize = 5
 
     @Value("\${api.url}")
     lateinit var apiUrl: String
@@ -31,7 +31,7 @@ class ConversionService @Autowired constructor(private val repository : Conversi
     @Value("\${api.key}")
     lateinit var apiKey: String
 
-    fun convert(from : String, to : String, amount : BigDecimal) : GetConversionResponseDTO
+    fun convert(from : String, to : String, amount : BigDecimal) : Conversion
     {
         if(amount <= BigDecimal.ZERO)
         {
@@ -39,9 +39,7 @@ class ConversionService @Autowired constructor(private val repository : Conversi
             throw IllegalArgumentException("Amount can't be negative")
         }
 
-        val externalResponse = getExternalConversion(buildURL(from, to, amount))
-
-        return GetConversionResponseDTO(externalResponse.response.to, externalResponse.response.value)
+        return getExternalConversion(buildURL(from, to, amount))
     }
 
     fun getConversions(pageNumber: Int) : List<Conversion>
@@ -57,7 +55,7 @@ class ConversionService @Autowired constructor(private val repository : Conversi
         return "${apiUrl}?api_key=${apiKey}&to=${to}&from=${from}&amount=${amount}"
     }
 
-    private fun getExternalConversion(serviceURL : String) : ExternalConvertDTO
+    private fun getExternalConversion(serviceURL : String) : Conversion
     {
         val client = OkHttpClient()
         val request = Request.Builder().url(serviceURL).build()
@@ -98,15 +96,12 @@ class ConversionService @Autowired constructor(private val repository : Conversi
                         externalResponse.response.value
                         , Date()
                 )
-//
-                //
-
 
                 logger.info("Storing in the database")
                 repository.save(record)
 
                 logger.info("External request has completed")
-                return externalResponse
+                return record
             }
         }
         catch (ex : Exception)

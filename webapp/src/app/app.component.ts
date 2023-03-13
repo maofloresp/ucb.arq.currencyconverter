@@ -1,13 +1,7 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
-
-interface Conversion {
-  date: string;
-  from: string;
-  to: string;
-  amount: number;
-  value: number;
-}
+import { Conversion } from './models/conversion'
+import { ConversionService } from './services/conversion.service';
 
 @Component({
   selector: 'app-root',
@@ -19,26 +13,53 @@ export class AppComponent {
   title = 'Currency Converter';
   author = 'Mauricio Flores';
   currencyForm : FormGroup;
+  result = 0;
 
-  displayedColumns: string[] = ['date', 'from', 'to', 'amount', 'value'];
-  dataSource =  [
-    {date: '2023-03-11', from: 'EUR', to: 'USD', amount: 778.03, value: 853.12},
-  ];
+  displayedColumns: string[] = ['date', 'from', 'amount', 'to', 'value'];
+  dataSource: Conversion[] =  [];
   /**
    *
    */
-  constructor(private formBuilder: FormBuilder)
+  constructor(private formBuilder: FormBuilder, private conversionService: ConversionService)
   {
     this.currencyForm = this.formBuilder.group({
       from: '',
       to: '',
       amount: ''
     })
-    
+
+    this.readConversions();
+  }
+
+  private getFormValue(fieldName: string): string
+  {
+    return this.currencyForm.get(fieldName)?.value;
+  }
+
+  private readConversions(page : number = 1)
+  {
+    this.conversionService.getConversions(page).subscribe({
+      next: (data) => this.dataSource = data,
+      error: () => this.dataSource = []
+    });
+  }
+
+  private convert(from: string, to: string, amount: number) : void
+  {
+    this.conversionService.postConversion(from,to,amount).subscribe({
+      next: (data) => 
+      {
+        this.result = data.result;
+        this.readConversions();
+      },
+      error: () => this.result = -1
+    });
   }
 
   submit()
-  {
-    console.log(this.currencyForm.value)
+  {    
+    this.convert(this.getFormValue('from'), this.getFormValue('to'), parseInt(this.getFormValue('amount')));
   }
+
+
 }
