@@ -8,7 +8,7 @@ import ucb.softarch.currencyconverter.services.ConversionService
 import ucb.softarch.currencyconverter.utils.HasLogging
 import java.util.*
 
-@CrossOrigin()
+@CrossOrigin(origins = ["http://localhost:4200"])
 @RestController
 class ConversionController @Autowired constructor(private val service: ConversionService) : HasLogging() {
 
